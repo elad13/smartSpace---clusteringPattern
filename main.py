@@ -1,67 +1,87 @@
-from itertools import groupby
 import pandas as pd
-import numpy as np
 import csv
-
+from exportDB import read_mongo
 from point import Point
-from clustering import Clustering, iterative_kmeans, plotClusters, plotly
+from clustering import iterative_kmeans
+
+# Export data from mongoDB
+df_exportDB = read_mongo('course', 'ACTIONS', {}, host='smartspace-shard-00-01-zmxlk.azure.mongodb.net', port=27017, username='admin', password='Afeka2020', no_id=True)
+df_exportDB.to_csv('data/ActionsFile.csv', index=False)
+
+# Insert the user you want to analyze.
+userEmail = 'eladm1991@gmail.com'#input("Enter the email of the user: ")
+
+inputFile = 'data/smartSpace_' + userEmail + '_beforCluster.csv'
+resultsFile = 'data/smartSpace_' + userEmail + '_afterCluster.csv'
 
 # Load Data
-df = pd.read_csv('data/smartSpace1_fullSpace.csv')
-df.drop(['Id'], axis=1, inplace=True)
+df = pd.read_csv('data/ActionsFile.csv')
 
-df_userActions = pd.DataFrame(np.array(df), columns=['elementId', 'Day', 'Hour', 'Action'])
-#print(df_userActions.head())
-#print(df_userActions)
+# ****************          Create new Data Frame - check if legal!!!             ********************
+df_userActions = pd.DataFrame(columns=['elementId', 'Day', 'Hour', 'Action'])
+
+for user in df['playerEmail']:
+    # filter the data for each user email
+    if (user == userEmail):
+        df_userActions['elementId'] = df['elementId'].loc[df['playerEmail']==userEmail]
+
+        dateFromTimeStamp = pd.to_datetime(df['creationTimestamp'].loc[df['playerEmail']==userEmail])
+        df_userActions['Day'] = dateFromTimeStamp.dt.strftime("%w")
+        df_userActions['Hour'] = dateFromTimeStamp.dt.strftime("%H%M")
+
+        tg = df['moreAttributes'].loc[df['playerEmail']==userEmail]
+        a_string = tg.to_string(index=False)
+        escaped = a_string.translate(str.maketrans({"{": r"",
+                                                    "}": r"",
+                                                    "'": r"",
+                                                    " ": r"",
+                                                    "\n": r";",
+                                                    ",": r"*"}))
+
+        escaped2 = escaped.split(';')
+        for line in escaped2:
+            fg = line.split(':')
+            print(fg)
+            if(fg[1] == 'Off'):
+                df_userActions['Action'] = 0
+            elif (fg[1] == 'On'):
+                df_userActions['Action'] = 1
+            # for dv in fg:
+            #     gt = dv.split('*')
+            #     if(gt[1] == 'Off'):
+            #         df_userActions['Action'] = 0
+            #     elif (gt[1] == 'On'):
+            #         df_userActions['Action'] = 1
+
+            # *********************** need to insert the temp value ********************
+            # *********************** need to filter the temp value to the last one *******************
 
 
-# df_elements = []
-# for row in df_userActions.groupby('elementId'):
-#     df_elements.append(row)
+print('***')
+
+# save into csv file using filename: color_colour.csv
+df_userActions.to_csv(inputFile, index=False)
+
+print(df_userActions)
 
 dataframe_collection = {}
 
-# d1 = df_elements.copy()
-# print(d1)
-# print(type(df_elements))
-# de_ele1 = pd.DataFrame(df_elements[0])
-# print(de_ele1)
-
 dataframe_collection = [y for x , y in df_userActions.groupby(['elementId', 'Day'])]
-
-# df_elementAndDay = []
-# for row in df_userActions.groupby(['elementId', 'Day']):
-#     df_elementAndDay.append(row)
-#     #print(row)
-# #print(df_elementAndDay[7])
-
-# for i in range(0, len(df_elementAndDay)):
-#     #print("i: ", i, " ", df_elementAndDay[i])
-#     dataframe_collection[i] = pd.DataFrame(np.array(df_elementAndDay[i]))
-#     print(dataframe_collection[i])
-
-# df_elements = []
-# for row in df_userActions.groupby('elementId'):
-#     df_elements.append(row)
-# #print(df_elements[0])
 
 dimensions = 3
 
 # The K in k-means. How many clusters do we assume exist?
 #   - Must be less than num_points
-num_clusters = 2 #cluster to on and cluster to off - need to change in the future
+num_clusters = 2 #cluster to on and cluster to off - need to change in the future *************************************************
 
 # When do we say the process has 'converged' and stop updating clusters?
-cutoff = 0.2 #need to understand the number
+cutoff = 0.2 #need to understand the number *************************************************
 
 # Cluster those data!
-iteration_count = 20 #need to understand the number
-
-with open('data/smartSpace1_fullSpace_afterCluster.csv', 'w') as csvfile:
+iteration_count = 20 #need to understand the number *************************************************
+with open(resultsFile, 'w') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["elementId", "Day", "Hour", "Action"])
-
-
 
 x = {}
 
@@ -71,13 +91,9 @@ for i in range(0, len(dataframe_collection)):
     points = []
     x[i] = dataframe_collection[i].values
     elementNum = x[i][0][0]
-    #print(elementNum)
     print(x[i])
-    #print("!!!!!!!!!!")
     for row in x[i]:
         coor = []
-        #print("index: ", i)
-        #print("point:", row)
         #coor.append(row[0])         #element ID
         coor.append(float(row[1]))  #Day = x
         coor.append(float(row[2]))  #Hour = y
@@ -94,7 +110,6 @@ for i in range(0, len(dataframe_collection)):
     ))
 
     print("best clusters: ", best_clusters[i])
-    #print("@@@@@@@@@@@")
 
     centroid = {}
     df_centroidTemp = {}
@@ -110,81 +125,7 @@ for i in range(0, len(dataframe_collection)):
         centroid['z'] = c.centroid.coords[2]
         print("iter: ", i, ", cluster number: ", j, ", centroid: ")
         print("element id: ", elementNum, ", ", centroid)
-        #df_centroidsTable.append(centroid)
-        #print(df_centroidsTable)
-        with open('data/smartSpace1_fullSpace_afterCluster.csv', 'a') as csvfile:
+
+        with open(resultsFile, 'a') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([elementNum, centroid['x'], centroid['y'], centroid['z']])
-    #print("&&&&&&&&&&&")
-
-        #df_centroidTemp[j] = centroid.values()
-        #print(df_centroidTemp[j])
-        #df_centroidsTable.append(elementNum)
-    #print(df_centroidsTable)
-
-    #df_centroidsTable[index] = df_centroidTemp[0].values()
-    #df_centroidsTable[index+1] = df_centroidTemp[1].values()
-    #index = index+1
-    #print("^^^^^^^^^^^^^^^")
-#print(df_centroidsTable)
-
-    # # Display clusters using plotly for 2d data
-    # if dimensions in [2, 3] and plotly:
-    #     print("Plotting points, launching browser ...")
-    #     plotClusters(best_clusters, dimensions)
-
-
-
-#plotClusters(best_clusters[7], dimensions)
-#print(x[0])
-#print(len(x))
-#print("############")
-#print("$$$$$$$$$$$$$$$$$$$")
-
-
-
-#dataframe_collectionCentroids = [y for x , y in df_userActions.groupby(['elementId'])]
-
-#create the points (x, y, z)
-# points = []
-# for i in range(0, len(dataframe_collection)):
-#     #print(dataframe_collection[i])
-#     #print(i)
-#     for row in x[i]:
-#         coor = []
-#         #print("index: ", i)
-#         #print("point:", row)
-#         coor.append(float(row[1]))
-#         coor.append(float(row[2]))
-#         coor.append(float(row[3]))
-#         point = Point(coor)
-#         points.append(point)
-#
-# dimensions = 3
-#
-# # The K in k-means. How many clusters do we assume exist?
-# #   - Must be less than num_points
-# num_clusters = 8
-#
-# # When do we say the process has 'converged' and stop updating clusters?
-# cutoff = 0.2
-#
-#
-# # Cluster those data!
-# iteration_count = 20
-# best_clusters = iterative_kmeans(
-#     points,
-#     num_clusters,
-#     cutoff,
-#     iteration_count
-# )
-#
-# # Print our best clusters
-# for i, c in enumerate(best_clusters):
-#     for p in c.points:
-#         print(" Cluster: {} \t Point : {}".format(i, p))
-#
-# # Display clusters using plotly for 2d data
-# if dimensions in [2, 3] and plotly:
-#     print("Plotting points, launching browser ...")
-#     plotClusters(best_clusters, dimensions)
