@@ -29,16 +29,4 @@ def read_mongo(db, collection, query={}, host='localhost', port=27017, username=
     if no_id and '_id' in df:
         del df['_id']
 
-    # Delete the _elementId
-    # if no_elementId and 'elementId' in df:
-         # del df['elementId']
-
-     # Delete the _elementId
-    # if no_elementId and 'elementId' in df:
-    #     del df['elementId']
-
     return df
-
-# if __name__ == '__main__':
-#     df = read_mongo('course', 'ACTIONS', {}, host='smartspace-shard-00-01-zmxlk.azure.mongodb.net', port=27017, username='admin', password='Afeka2020', no_id=True)
-#     df.to_csv('ActionsFile.csv', index=False)

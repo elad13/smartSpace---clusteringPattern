@@ -2,62 +2,10 @@ import pandas as pd
 import csv
 from exportDB import read_mongo
 from point import Point
-from clustering import iterative_kmeans
+from clustering import iterative_kmeans, plotClusters, plotly
 from element import Element
 import pymongo
 
-# Export data from mongoDB
-# mongo_uri = 'mongodb://admin:Afeka2020@smartspace-shard-00-00-zmxlk.azure.mongodb.net:27017,smartspace-shard-00-01-zmxlk.azure.mongodb.net:27017,smartspace-shard-00-02-zmxlk.azure.mongodb.net:27017/test?ssl=true&replicaSet=SmartSpace-shard-0&authSource=admin&retryWrites=true'
-# myclient = pymongo.MongoClient(mongo_uri)
-# mydb = myclient['course']
-# mycol = mydb['ACTIONS']
-# # for x in mycol.find({},{'_id': 0, 'actionSmartspace': 0, 'actionId': 0, 'elementSmartspace': 0,  'playerSmartspace': 0, '_class': 0}):
-# #   #print(x)
-# #   df_exportDB = x
-# #   with open('data/ActionsFile.csv', 'w') as outfile:
-# #       fields = ['elementId', 'playerEmail', 'actionType', 'creationTimestamp', 'moreAttributes']
-# #       write = csv.DictWriter(outfile, fieldnames=fields)
-# #       write.writeheader()
-# #       for answers_record in x:  # Here we are using 'cursor' as an iterator
-# #           #print(answers_record)
-# #           #print('!!!')
-# #           print(answers_record['elementId'])
-# #
-# #           answers_record_id = answers_record['elementId']
-# #           #for answer_record in answers_record['answers']:
-# #           flattened_record = {
-# #               'elementId': answers_record_id,
-# #               'playerEmail': answers_record['playerEmail'],
-# #               'actionType': answers_record['actionType'],
-# #               'creationTimestamp': answers_record['creationTimestamp'],
-# #               'moreAttributes': answers_record['moreAttributes']
-# #           }
-# #           write.writerow(flattened_record)
-#
-# fields = ['elementId', 'playerEmail', 'actionType', 'creationTimestamp', 'moreAttributes']
-# #data_py = mycol.find({},{'_id': 0, 'elementId': 1,'playerEmail': 1,'actionType': 1,'creationTimestamp': 1,'moreAttributes': 1})
-# data_py = mycol.find({},{'_id': 0, 'actionSmartspace': 0, 'actionId': 0, 'elementSmartspace': 0,  'playerSmartspace': 0, '_class': 0})
-# with open('data/ActionsFile.csv', 'w', newline='') as outfile:
-#     csv_output = csv.writer(outfile)
-#     csv_output.writerow(fields)
-#
-#     for data in data_py:
-#         csv_output.writerow(
-#             [
-#                 data['elementId'],
-#                 data['playerEmail'],
-#                 data['actionType'],
-#                 data['creationTimestamp'],
-#                 data['moreAttributes']
-#             ])
-#
-#
-#     print(csv_output)
-#
-#     #outfile.write(x)
-# #df_exportDB.to_csv('data/ActionsFile.csv', index=False)
-# print(csv_output)
-# print('#######')
 df_exportDB = read_mongo('course', 'ACTIONS', {}, host='smartspace-shard-00-01-zmxlk.azure.mongodb.net', port=27017, username='admin', password='Afeka2020', no_id=True)
 df_exportDB.drop(['actionSmartspace', 'actionId', 'elementSmartspace',  'playerSmartspace', '_class'], axis=1, inplace=True)
 
@@ -72,7 +20,6 @@ resultsFile = 'data/smartSpace_' + userEmail + '_afterCluster.csv'
 
 # Load Data
 elements = []
-#fields = ['elementId', 'actionType', 'creationTimestamp', 'moreAttributes']
 userFileFields = ['elementId', 'actionType', 'Day', 'Hour', 'moreAttributes']
 
 with open('data/ActionsFile.csv', newline='') as mongoFile:
@@ -119,60 +66,10 @@ with open(inputFile, 'w', newline='') as userFile:
             userInput.writerow(
                 [
                     elements[idx].elementId,
-                    #elements[el].actionType, **************************
                     day,
                     hour,
                     state
                 ])
-
-print('***')
-# df = pd.read_csv('data/ActionsFile.csv')
-#
-# # ****************          Create new Data Frame - check if legal!!!             ********************
-# df_userActions = pd.DataFrame(columns=['elementId', 'Day', 'Hour', 'Action'])
-#
-# for user in df['playerEmail']:
-#     # filter the data for each user email
-#     if (user == userEmail):
-#         df_userActions['elementId'] = df['elementId'].loc[df['playerEmail']==userEmail]
-#
-#         dateFromTimeStamp = pd.to_datetime(df['creationTimestamp'].loc[df['playerEmail']==userEmail])
-#         df_userActions['Day'] = dateFromTimeStamp.dt.strftime("%w")
-#         df_userActions['Hour'] = dateFromTimeStamp.dt.strftime("%H%M")
-#
-#         tg = df['moreAttributes'].loc[df['playerEmail']==userEmail]
-#         a_string = tg.to_string(index=False)
-#         escaped = a_string.translate(str.maketrans({"{": r"",
-#                                                     "}": r"",
-#                                                     "'": r"",
-#                                                     " ": r"",
-#                                                     "\n": r";",
-#                                                     ",": r"*"}))
-#
-#         escaped2 = escaped.split(';')
-#         for line in escaped2:
-#             fg = line.split(':')
-#             print(fg)
-#             if(fg[1] == 'Off'):
-#                 df_userActions['Action'].loc[df['playerEmail']==userEmail] = 0
-#             elif (fg[1] == 'On'):
-#                 df_userActions['Action'].loc[df['playerEmail']==userEmail] = 1
-#             # for dv in fg:
-#             #     gt = dv.split('*')
-#             #     if(gt[1] == 'Off'):
-#             #         df_userActions['Action'] = 0
-#             #     elif (gt[1] == 'On'):
-#             #         df_userActions['Action'] = 1
-#
-#             # *********************** need to insert the temp value ********************
-#             # *********************** need to filter the temp value to the last one *******************
-#
-#
-# save into csv file using filename: color_colour.csv
-#df_userActions.to_csv(inputFile, index=False)
-#
-#print(df_userActions)
-print('***')
 
 df_userActions = pd.read_csv(inputFile)
 
@@ -184,13 +81,13 @@ dimensions = 3
 
 # The K in k-means. How many clusters do we assume exist?
 #   - Must be less than num_points
-num_clusters = 2 #cluster to on and cluster to off - need to change in the future *************************************************
+#num_clusters = 2
 
 # When do we say the process has 'converged' and stop updating clusters?
-cutoff = 0.2 #need to understand the number *************************************************
+cutoff = 0.2
 
 # Cluster those data!
-iteration_count = 20 #need to understand the number *************************************************
+iteration_count = 20
 with open(resultsFile, 'w') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["elementId", "Day", "Hour", "Action"])
@@ -206,18 +103,17 @@ for i in range(0, len(dataframe_collection)):
     print(x[i])
     for row in x[i]:
         coor = []
-        #coor.append(row[0])         #element ID
         coor.append(float(row[1]))  #Day = x
         coor.append(float(row[2]))  #Hour = y
         coor.append(float(row[3]))  #Action = z
         point = Point(coor)
         points.append(point)
-        #print(points)
     print(len(points))
-    clusterNum = ((len(points))/4)/2
+    clusterNum = int(((len(points))/4)/2)
     best_clusters.append(iterative_kmeans(
         points,
-        num_clusters,
+        clusterNum,
+        #num_clusters,
         cutoff,
         iteration_count
     ))
@@ -239,3 +135,8 @@ for i in range(0, len(dataframe_collection)):
         with open(resultsFile, 'a') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([elementNum, centroid['x'], centroid['y'], centroid['z']])
+
+    # # Display clusters using plotly for 3d data
+    # if dimensions in [2, 3] and plotly:
+    #     print("Plotting points, launching browser ...")
+    #     plotClusters(best_clusters, dimensions)

@@ -1,6 +1,5 @@
 
 class Element(object):
-    #lister = []
     def __init__(self, elementId, playerEmail, actionType, creationTimestamp, moreAttributes):
         self.elementId = elementId
         self.playerEmail = playerEmail

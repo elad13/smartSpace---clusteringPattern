@@ -1,0 +1,7 @@
+actionSmartspace,actionId,elementSmartspace,elementId,playerSmartspace,playerEmail,actionType,creationTimestamp,moreAttributes,_class
+smartSpaceProject,7,smartSpaceProject,23,smartSpaceProject,eladm1991@gmail.com,OnOff,2020-06-13 10:42:16.734,{'state': 'Off'},smartspace.data.ActionEntity
+smartSpaceProject,8,smartSpaceProject,1,smartSpaceProject,eladm1991@gmail.com,OnOff,2020-06-13 10:42:17.813,{'state': 'On'},smartspace.data.ActionEntity
+smartSpaceProject,9,smartSpaceProject,1,smartSpaceProject,eladm1991@gmail.com,ChangeTemperature,2020-06-13 10:42:18.554,"{'temperature': 25, 'state': 'Off'}",smartspace.data.ActionEntity
+smartSpaceProject,1,smartSpaceProject,20,smartSpaceProject,alonchemp1@gmail.com,CheckIn,2020-06-14 11:06:39.521,,smartspace.data.ActionEntity
+smartSpaceProject,2,smartSpaceProject,14,smartSpaceProject,alonchemp1@gmail.com,OnOff,2020-06-14 11:06:47.910,{'state': 'Off'},smartspace.data.ActionEntity
+smartSpaceProject,3,smartSpaceProject,14,smartSpaceProject,alonchemp1@gmail.com,OnOff,2020-06-14 11:06:48.701,{'state': 'Off'},smartspace.data.ActionEntity

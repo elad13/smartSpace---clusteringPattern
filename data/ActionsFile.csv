@@ -1,0 +1,7 @@
+elementId,playerEmail,actionType,creationTimestamp,moreAttributes
+23,eladm1991@gmail.com,OnOff,2020-06-13 10:42:16.734,{'state': 'Off'}
+1,eladm1991@gmail.com,OnOff,2020-06-13 10:42:17.813,{'state': 'On'}
+1,eladm1991@gmail.com,ChangeTemperature,2020-06-13 10:42:18.554,"{'temperature': 25, 'state': 'Off'}"
+20,alonchemp1@gmail.com,CheckIn,2020-06-14 11:06:39.521,
+14,alonchemp1@gmail.com,OnOff,2020-06-14 11:06:47.910,{'state': 'Off'}
+14,alonchemp1@gmail.com,OnOff,2020-06-14 11:06:48.701,{'state': 'Off'}
