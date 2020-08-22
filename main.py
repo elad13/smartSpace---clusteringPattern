@@ -66,6 +66,7 @@ with open(inputFile, 'w', newline='') as userFile:
             userInput.writerow(
                 [
                     elements[idx].elementId,
+                    elements[idx].actionType,
                     day,
                     hour,
                     state
@@ -81,7 +82,7 @@ dimensions = 3
 
 # The K in k-means. How many clusters do we assume exist?
 #   - Must be less than num_points
-#num_clusters = 2
+num_clusters = 2
 
 # When do we say the process has 'converged' and stop updating clusters?
 cutoff = 0.2
@@ -103,13 +104,13 @@ for i in range(0, len(dataframe_collection)):
     print(x[i])
     for row in x[i]:
         coor = []
-        coor.append(float(row[1]))  #Day = x
-        coor.append(float(row[2]))  #Hour = y
-        coor.append(float(row[3]))  #Action = z
+        coor.append(float(row[2]))  #Day = x
+        coor.append(float(row[3]))  #Hour = y
+        coor.append(float(row[4]))  #Action = z
         point = Point(coor)
         points.append(point)
     print(len(points))
-    clusterNum = int(((len(points))/4)/2)
+    clusterNum = int(((len(points))/4))
     best_clusters.append(iterative_kmeans(
         points,
         clusterNum,
